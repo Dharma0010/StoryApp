@@ -1,6 +1,7 @@
 package com.example.storyapp.story
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -69,7 +70,8 @@ class StoryListFragment : Fragment() {
                 }
                 is ResultState.Error -> {
                     showLoading(false)
-                    Toast.makeText(requireContext(), "Error: ${result.error}", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(requireContext(), "Error: ${result.error}", Toast.LENGTH_SHORT).show()
+                    Log.e("StoryListFragment", "Error: ${result.error}")
                 }
             }
         }

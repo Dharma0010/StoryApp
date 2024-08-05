@@ -43,13 +43,6 @@ class LoginActivity : AppCompatActivity() {
             when (result) {
                 is ResultState.Loading -> showLoading(true)
                 is ResultState.Success -> {
-                    viewModel.saveSession(
-                        UserModel(
-                            email = binding.emailEditText.text.toString(),
-                            token = result.data.loginResult?.token.toString(),
-                            isLogin = true
-                        )
-                    )
                     Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show()
                     val intent = Intent(this@LoginActivity,  MainActivity::class.java)
                     showLoading(false)

@@ -20,8 +20,6 @@ class AuthRepository(
         userPreference.saveSession(user)
     }
 
-
-
     suspend fun logout() {
         userPreference.logout()
     }
@@ -40,6 +38,13 @@ class AuthRepository(
         emit(ResultState.Loading)
         try {
             val response = apiService.login(email = email, password = password)
+            saveSession(
+                UserModel(
+                    email = email,
+                    token = response.loginResult?.token ?: "",
+                    isLogin = true
+                )
+            )
             emit(ResultState.Success(response))
         } catch (e: Exception) {
             Log.d("StoryRepository", "getStories: ${e.message.toString()} ")

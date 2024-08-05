@@ -25,13 +25,6 @@ class ViewModelFactory (private val authRepository: AuthRepository) :
     }
 
     companion object {
-        @JvmStatic
-        fun getInstance(context: Context): ViewModelFactory {
-            return createFactory(context)
-        }
-
-        private fun createFactory(context: Context): ViewModelFactory {
-            return ViewModelFactory(Injection.provideAuthRepository(context))
-        }
+        fun getInstance(context: Context): ViewModelFactory = ViewModelFactory(Injection.provideAuthRepository(context))
     }
 }
