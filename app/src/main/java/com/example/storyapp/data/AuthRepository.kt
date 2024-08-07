@@ -3,14 +3,11 @@ package com.example.storyapp.data
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
-import com.example.storyapp.data.api.ApiService
+import com.example.storyapp.data.api.remote.ApiService
 import com.example.storyapp.data.api.response.LoginResponse
-import com.example.storyapp.data.api.response.LoginResult
 import com.example.storyapp.data.api.response.RegisterResponse
-import com.example.storyapp.data.api.response.Story
 import com.example.storyapp.data.api.response.UserModel
 import com.example.storyapp.data.session.UserPreference
-import kotlinx.coroutines.flow.Flow
 
 class AuthRepository(
     private val apiService: ApiService,

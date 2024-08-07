@@ -7,16 +7,41 @@
 
     <fragment
         android:id="@+id/storyListFragment"
-        android:name="com.example.storyapp.story.StoryListFragment"
-        android:label="Story"
+        android:name="com.example.storyapp.ui.story.StoryListFragment"
+        android:label="@string/story"
         tools:layout="@layout/fragment_story_list" >
         <action
-            android:id="@+id/action_storyListFragment_to_addandUpdateStoryFragment"
-            app:destination="@id/addandUpdateStoryFragment" />
+            android:id="@+id/action_storyListFragment_to_addandStoryFragment"
+            app:destination="@id/addandStoryFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popExitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_left"/>
+        <action
+            android:id="@+id/action_storyListFragment_to_detailStoryFragment"
+            app:destination="@id/detailStoryFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popExitAnim="@anim/slide_out_to_right"
+            app:popEnterAnim="@anim/slide_in_from_left"/>
     </fragment>
     <fragment
-        android:id="@+id/addandUpdateStoryFragment"
-        android:name="com.example.storyapp.story.AddStoryFragment"
-        android:label="Add Story"
-        tools:layout="@layout/fragment_add_story" />
+        android:id="@+id/addandStoryFragment"
+        android:name="com.example.storyapp.ui.story.AddStoryFragment"
+        android:label="@string/add_story"
+        tools:layout="@layout/fragment_add_story" >
+        <action
+            android:id="@+id/action_addandStoryFragment_to_storyListFragment"
+            app:destination="@id/storyListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/detailStoryFragment"
+        android:name="com.example.storyapp.ui.story.DetailStoryFragment"
+        android:label="@string/detail_story"
+        tools:layout="@layout/fragment_detail_story" >
+        <argument
+            android:name="id"
+            app:argType="string"
+            app:nullable="false"/>
+    </fragment>
 </navigation>

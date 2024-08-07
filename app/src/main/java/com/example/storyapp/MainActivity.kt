@@ -2,19 +2,16 @@ package com.example.storyapp
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.storyapp.databinding.ActivityMainBinding
-import com.example.storyapp.databinding.ActivityWelcomeBinding
-import com.example.storyapp.login.LoginViewModel
-import com.example.storyapp.story.StoryViewModel
-import com.example.storyapp.welcome.WelcomeActivity
+import com.example.storyapp.ui.story.StoryViewModel
+import com.example.storyapp.ui.welcome.WelcomeActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -28,6 +25,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         viewModel.getSession().observe(this) { result ->
             if (!result.isLogin) {
                 val intent = Intent(this@MainActivity,  WelcomeActivity::class.java)
@@ -45,6 +43,13 @@ class MainActivity : AppCompatActivity() {
             navController = navController,
             configuration = appBarConfiguration
         )
+        binding.myToolbar.setNavigationOnClickListener {
+            navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+        }
     }
 
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = Navigation.findNavController(this, R.id.nav_host_fragment)
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
 }

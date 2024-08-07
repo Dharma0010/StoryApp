@@ -1,13 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="login">Login</string>
-    <string name="name">Name</string>
-    <string name="password_error_message">Password tidak boleh kurang dari 6 karakter</string>
-    <string name="title_story">Title story</string>
+    <string name="app_name">CeritaApp</string>
+    <string name="signup">Daftar</string>
+    <string name="login">Masuk</string>
+    <string name="message_welcome_page">Ekspresikan dan Bagikan cerita kehidupan sehari-hari kamu kepada banyak orang dan temukan kebahagiaan dari cerita dengan yang lainnya</string>
+    <string name="title_welcome_page">Selamat datang di CeritaApp!</string>
+    <string name="title_signup_page">Lengkapi data dirimu di bawah ini ya</string>
+    <string name="email" translatable="false">Email</string>
+    <string name="password">Kata sandi</string>
+    <string name="message_login_page">Masukkan dulu datamu ya</string>
+    <string name="title_login_page">Sudah siap untuk berbagi cerita?</string>
+    <string name="hello_blank_fragment">fragment kosong</string>
+    <string name="name">Nama</string>
+    <string name="password_error_message">Password tidak boleh kurang dari  karakter</string>
+    <string name="title_story">Judul daftar cerita</string>
     <string name="description_story">kajsbdhkabcjabsndankdjbakshdbasjxnlajdnjasbd</string>
-    <string name="gallery">Gallery</string>
-    <string name="upload">Upload</string>
-    <string name="camera_x">Camera X</string>
+    <string name="camera">Kamera</string>
+    <string name="gallery">Galeri</string>
+    <string name="upload">Unggah</string>
+    <string name="empty_image_warning">Silakan masukkan berkas gambar terlebih dahulu.</string>
+    <string name="add_description">Tambah deskripsi</string>
+    <string name="settings">Pengaturan</string>
+    <string name="story">Cerita</string>
+    <string name="add_story">Tambah Cerita</string>
+    <string name="detail_story">Detail Cerita</string>
 </resources>

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.storyapp.data.StoryRepository
 import com.example.storyapp.data.di.Injection
-import com.example.storyapp.story.StoryViewModel
+import com.example.storyapp.ui.story.StoryViewModel
 
 class StoryViewModelFactory(private val repository: StoryRepository): ViewModelProvider.NewInstanceFactory() {
 

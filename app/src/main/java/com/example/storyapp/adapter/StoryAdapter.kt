@@ -4,17 +4,18 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.storyapp.data.api.response.Story
+import com.example.storyapp.data.api.response.ListStory
 import com.example.storyapp.databinding.ItemStoryBinding
 import com.squareup.picasso.Picasso
 
-class StoryAdapter(private val onItemClick: (Story) -> Unit) :
+class StoryAdapter(private val onItemClick: (String) -> Unit) :
     RecyclerView.Adapter<StoryAdapter.StoryViewHolder>() {
 
-    private val stories = mutableListOf<Story>()
+    private val stories = mutableListOf<ListStory>()
+
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setStories(newStories: List<Story>) {
+    fun setStories(newStories: List<ListStory>) {
         stories.clear()
         stories.addAll(newStories)
         notifyDataSetChanged()
@@ -34,12 +35,12 @@ class StoryAdapter(private val onItemClick: (Story) -> Unit) :
     inner class StoryViewHolder(private val binding: ItemStoryBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(story: Story) {
+        fun bind(listStory: ListStory) {
             binding.apply {
-                tvName.text = story.name
-                tvDesc.text = story.description
-                Picasso.get().load(story.photoUrl).into(ivStoryItem)
-                cvItemStory.setOnClickListener { onItemClick(story) }
+                tvName.text = listStory.name
+                tvDesc.text = listStory.description
+                Picasso.get().load(listStory.photoUrl).into(ivStoryItem)
+                cvItemStory.setOnClickListener { onItemClick(listStory.id.toString()) }
             }
         }
     }

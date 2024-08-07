@@ -3,7 +3,7 @@ package com.example.storyapp.data.di
 import android.content.Context
 import com.example.storyapp.data.AuthRepository
 import com.example.storyapp.data.StoryRepository
-import com.example.storyapp.data.api.ApiConfig
+import com.example.storyapp.data.api.remote.ApiConfig
 import com.example.storyapp.data.session.UserPreference
 import com.example.storyapp.data.session.dataStore
 import kotlinx.coroutines.flow.first

@@ -1,4 +1,4 @@
-package com.example.storyapp.login
+package com.example.storyapp.ui.login
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.storyapp.MainActivity
 import com.example.storyapp.ViewModelFactory
 import com.example.storyapp.data.ResultState
-import com.example.storyapp.data.api.response.UserModel
 import com.example.storyapp.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {

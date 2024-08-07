@@ -1,11 +1,9 @@
-package com.example.storyapp.login
+package com.example.storyapp.ui.login
 
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.storyapp.data.AuthRepository
-import com.example.storyapp.data.api.response.UserModel
 import kotlinx.coroutines.launch
 
 class LoginViewModel(private val repository: AuthRepository): ViewModel() {
@@ -16,4 +14,10 @@ class LoginViewModel(private val repository: AuthRepository): ViewModel() {
 //            repository.saveSession(user)
 //        }
 //    }
+
+    fun logout() {
+        viewModelScope.launch {
+            repository.logout()
+        }
+    }
 }

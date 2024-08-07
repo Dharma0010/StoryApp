@@ -1,4 +1,4 @@
-package com.example.storyapp.signup
+package com.example.storyapp.ui.signup
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,13 +7,10 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.storyapp.R
 import com.example.storyapp.ViewModelFactory
 import com.example.storyapp.data.ResultState
 import com.example.storyapp.databinding.ActivityRegisterBinding
-import com.example.storyapp.login.LoginActivity
+import com.example.storyapp.ui.login.LoginActivity
 
 class RegisterActivity : AppCompatActivity() {
 

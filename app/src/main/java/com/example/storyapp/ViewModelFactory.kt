@@ -5,9 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.storyapp.data.AuthRepository
 import com.example.storyapp.data.di.Injection
-import com.example.storyapp.login.LoginViewModel
-import com.example.storyapp.signup.RegisterViewModel
-import com.example.storyapp.story.StoryViewModel
+import com.example.storyapp.ui.login.LoginViewModel
+import com.example.storyapp.ui.signup.RegisterViewModel
 
 class ViewModelFactory (private val authRepository: AuthRepository) :
     ViewModelProvider.NewInstanceFactory() {

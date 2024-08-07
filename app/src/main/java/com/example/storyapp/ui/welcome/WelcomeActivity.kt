@@ -1,4 +1,4 @@
-package com.example.storyapp.welcome
+package com.example.storyapp.ui.welcome
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
@@ -8,18 +8,11 @@ import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
-import com.example.storyapp.MainActivity
-import com.example.storyapp.R
 import com.example.storyapp.ViewModelFactory
-import com.example.storyapp.databinding.ActivityRegisterBinding
 import com.example.storyapp.databinding.ActivityWelcomeBinding
-import com.example.storyapp.login.LoginActivity
-import com.example.storyapp.login.LoginViewModel
-import com.example.storyapp.signup.RegisterActivity
-import kotlinx.coroutines.launch
+import com.example.storyapp.ui.login.LoginActivity
+import com.example.storyapp.ui.login.LoginViewModel
+import com.example.storyapp.ui.signup.RegisterActivity
 
 class WelcomeActivity : AppCompatActivity() {
 

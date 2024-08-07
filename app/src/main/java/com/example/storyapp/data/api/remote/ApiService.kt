@@ -1,13 +1,20 @@
-package com.example.storyapp.data.api
+package com.example.storyapp.data.api.remote
 
+
+import com.example.storyapp.data.api.response.DetailStoryResponse
+import com.example.storyapp.data.api.response.FileUploadResponse
 import com.example.storyapp.data.api.response.LoginResponse
 import com.example.storyapp.data.api.response.RegisterResponse
 import com.example.storyapp.data.api.response.StoryResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
-import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
+import retrofit2.http.Path
 
 interface ApiService {
     @FormUrlEncoded
@@ -28,4 +35,16 @@ interface ApiService {
     @GET("stories")
     suspend fun getStories(
     ): StoryResponse
+
+    @GET("stories/{id}")
+    suspend fun getDetailStories(
+        @Path("id") id: String
+    ) : DetailStoryResponse
+
+    @Multipart
+    @POST("stories")
+    suspend fun addStory(
+        @Part("description") description: RequestBody,
+        @Part file: MultipartBody.Part,
+    ): FileUploadResponse
 }

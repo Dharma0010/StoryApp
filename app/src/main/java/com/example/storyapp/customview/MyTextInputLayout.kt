@@ -16,10 +16,8 @@ class MyTextInputLayout @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (editText?.text?.length!! >= 6) {
-            boxStrokeColor = ContextCompat.getColor(context ,R.color.navy)
-        } else {
-            boxStrokeColor = ContextCompat.getColor(context ,R.color.red)
+        if (editText?.text?.length!! <= 6) {
+            boxStrokeColor = ContextCompat.getColor(context, R.color.md_theme_error)
         }
     }
 }
