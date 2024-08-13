@@ -43,9 +43,6 @@ class MainActivity : AppCompatActivity() {
             navController = navController,
             configuration = appBarConfiguration
         )
-        binding.myToolbar.setNavigationOnClickListener {
-            navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
-        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -23,4 +23,6 @@
     <string name="story">Cerita</string>
     <string name="add_story">Tambah Cerita</string>
     <string name="detail_story">Detail Cerita</string>
+    <string name="language_setting">Change language</string>
+    <string name="retry">Coba lagi</string>
 </resources>

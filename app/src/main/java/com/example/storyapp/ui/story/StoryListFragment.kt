@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.storyapp.ui.story
 
 import android.content.Intent
@@ -12,12 +14,14 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.storyapp.R
 import com.example.storyapp.StoryViewModelFactory
 import com.example.storyapp.ViewModelFactory
+import com.example.storyapp.adapter.LoadingStateAdapter
 import com.example.storyapp.adapter.StoryAdapter
 import com.example.storyapp.data.ResultState
 import com.example.storyapp.databinding.FragmentStoryListBinding
@@ -29,7 +33,7 @@ class StoryListFragment : Fragment() {
     private var _binding: FragmentStoryListBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: StoryViewModel by viewModels{
+    private val viewModel: StoryViewModel by activityViewModels{
         StoryViewModelFactory.getInstance(
             requireActivity()
         )
@@ -61,17 +65,21 @@ class StoryListFragment : Fragment() {
         binding.fabAddStory.setOnClickListener {
             findNavController().navigate(R.id.action_storyListFragment_to_addandStoryFragment)
         }
-
-
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.main_menu, menu)
     }
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.action_settings -> {
+            R.id.language_setting -> {
                 startActivity(Intent(Settings.ACTION_LOCALE_SETTINGS))
+                true
+            }
+            R.id.maps -> {
+                findNavController().navigate(R.id.action_storyListFragment_to_mapsFragment)
                 true
             }
             R.id.action_logout -> {
@@ -91,32 +99,22 @@ class StoryListFragment : Fragment() {
 
         binding.rvStory.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = storyAdapter
+            setHasFixedSize(true)
+            adapter = storyAdapter.withLoadStateFooter(
+                footer = LoadingStateAdapter {
+                    storyAdapter.retry()
+                }
+            )
         }
     }
 
     private fun observeViewModel() {
-        viewModel.getStories().observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is ResultState.Loading -> showLoading(true)
-                is ResultState.Success -> {
-                    showLoading(false)
-                    storyAdapter.setStories(result.data)
-                }
-                is ResultState.Error -> {
-                    showLoading(false)
-//                    Toast.makeText(requireContext(), "Error: ${result.error}", Toast.LENGTH_SHORT).show()
-                    Log.e("StoryListFragment", "Error: ${result.error}")
-                }
-            }
+        viewModel.stories.observe(viewLifecycleOwner) { result ->
+            storyAdapter.submitData(lifecycle = lifecycle, result)
         }
     }
 
-    private fun showLoading(isLoading: Boolean) {
-        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
-        binding.rvStory.isEnabled = !isLoading
-        binding.fabAddStory.isEnabled = !isLoading
-    }
+
 
     override fun onDestroy() {
         super.onDestroy()
