@@ -36,6 +36,16 @@ class StoryRepository(
             }
         ).liveData
     }
+    fun getLocationStories() = liveData {
+        emit(ResultState.Loading)
+        try {
+            val response = apiService.getStories(location = 1)
+            emit(ResultState.Success(response))
+        } catch (e: Exception) {
+            Log.d("StoryRepository", "getLocationStories: ${e.message.toString()} ")
+            emit(ResultState.Error(e.message.toString()))
+        }
+    }
 
     fun getDetailStory(id: String): LiveData<ResultState<DetailStoryResponse>> = liveData {
         emit(ResultState.Loading)
@@ -51,22 +61,29 @@ class StoryRepository(
         return userPreference.getSession()
     }
 
-    fun addStory(imageFile: File, description: String) = liveData {
-        emit(ResultState.Loading)
-        val requestBody = description.toRequestBody("text/plain".toMediaType())
-        val requestImageFile = imageFile.asRequestBody("image/jpeg".toMediaType())
-        val multipartBody = MultipartBody.Part.createFormData(
-            "photo",
-            imageFile.name,
-            requestImageFile
-        )
-        try {
-            val successResponse = apiService.addStory(file = multipartBody, description = requestBody)
-            emit(ResultState.Success(successResponse))
+    suspend fun addStory(imageFile: File, description: String, lat: Float? = null, lon: Float? = null) : ResultState<FileUploadResponse> {
+        return try {
+            ResultState.Loading
+            val requestBody = description.toRequestBody("text/plain".toMediaType())
+            val requestImageFile = imageFile.asRequestBody("image/jpeg".toMediaType())
+            val latBody = lat.toString().toRequestBody("text/plain".toMediaType())
+            val lonBody = lon.toString().toRequestBody("text/plain".toMediaType())
+            val multipartBody = MultipartBody.Part.createFormData(
+                "photo",
+                imageFile.name,
+                requestImageFile
+            )
+            val successResponse = apiService.addStory(
+                file = multipartBody,
+                description = requestBody,
+                lat = latBody,
+                lon = lonBody
+            )
+            ResultState.Success(successResponse)
         } catch (e: HttpException) {
             val errorBody = e.response()?.errorBody()?.string()
             val errorResponse = Gson().fromJson(errorBody, FileUploadResponse::class.java)
-            emit(ResultState.Error(errorResponse.message))
+            ResultState.Error(errorResponse.message)
         }
 
     }

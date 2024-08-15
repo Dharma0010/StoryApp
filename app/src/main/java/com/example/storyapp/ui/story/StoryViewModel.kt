@@ -9,6 +9,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.storyapp.data.ResultState
 import com.example.storyapp.data.StoryRepository
+import com.example.storyapp.data.api.response.FileUploadResponse
 import com.example.storyapp.data.api.response.ListStory
 import com.example.storyapp.data.api.response.UserModel
 import kotlinx.coroutines.launch
@@ -19,12 +20,10 @@ class StoryViewModel(private val repository: StoryRepository): ViewModel() {
     private val _stories = MutableLiveData<ResultState<List<ListStory>>>()
     val stories: LiveData<PagingData<ListStory>> = repository.getStories().cachedIn(viewModelScope)
 
-//    fun getStories() {
-//        viewModelScope.launch {
-//            _stories.postValue(ResultState.Loading)
-//            _stories.postValue(repository.getStories())
-//        }
-//    }
+    private val _addStory = MutableLiveData<ResultState<FileUploadResponse>>()
+    val addStory: LiveData<ResultState<FileUploadResponse>> = _addStory
+
+    fun getLocationStories() = repository.getLocationStories()
 
     fun getDetailStory(id: String) = repository.getDetailStory(id = id)
 
@@ -33,6 +32,11 @@ class StoryViewModel(private val repository: StoryRepository): ViewModel() {
         return repository.getSession().asLiveData()
     }
 
-    fun addStory(file: File, description: String) = repository.addStory(file, description)
+    fun uploadStory(file: File, description: String, lat: Float? = null, lon: Float? = null) {
+        viewModelScope.launch {
+            _addStory.postValue(repository.addStory(imageFile = file, description = description, lat = lat, lon = lon))
+        }
+
+    }
 
 }

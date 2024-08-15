@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.storyapp.R
@@ -26,6 +27,7 @@ import com.example.storyapp.adapter.StoryAdapter
 import com.example.storyapp.data.ResultState
 import com.example.storyapp.databinding.FragmentStoryListBinding
 import com.example.storyapp.ui.login.LoginViewModel
+import kotlinx.coroutines.launch
 
 
 class StoryListFragment : Fragment() {
@@ -58,8 +60,6 @@ class StoryListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentStoryListBinding.bind(view)
         setHasOptionsMenu(true)
-
-        setupRecyclerView()
         observeViewModel()
 
         binding.fabAddStory.setOnClickListener {
@@ -90,6 +90,20 @@ class StoryListFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        super.onResume()
+        if(!storyAdapter.snapshot().isEmpty()){
+            storyAdapter.refresh()
+            lifecycleScope.launch {
+                storyAdapter.loadStateFlow
+                    .collect {
+                        binding.rvStory.smoothScrollToPosition(0)
+                    }
+            }
+        }
+    }
+
     private fun setupRecyclerView() {
         storyAdapter = StoryAdapter { story ->
             // Navigate to DetailStoryFragment
@@ -109,6 +123,7 @@ class StoryListFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        setupRecyclerView()
         viewModel.stories.observe(viewLifecycleOwner) { result ->
             storyAdapter.submitData(lifecycle = lifecycle, result)
         }

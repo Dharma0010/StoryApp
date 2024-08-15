@@ -6,7 +6,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.viewModels
 import com.example.storyapp.R
+import com.example.storyapp.StoryViewModelFactory
+import com.example.storyapp.data.ResultState
+import com.example.storyapp.databinding.FragmentMapsBinding
+import com.example.storyapp.ui.story.StoryViewModel
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -17,7 +22,16 @@ import com.google.android.gms.maps.model.MarkerOptions
 
 class MapsFragment : Fragment() {
 
+    private val _binding: FragmentMapsBinding? = null
+    private val binding get() = _binding!!
+
+    private lateinit var mMap: GoogleMap
+
+    private val viewModel: StoryViewModel by viewModels {
+        StoryViewModelFactory.getInstance(requireActivity())
+    }
     private val callback = OnMapReadyCallback { googleMap ->
+        mMap = googleMap
         /**
          * Manipulates the map once available.
          * This callback is triggered when the map is ready to be used.
@@ -27,9 +41,25 @@ class MapsFragment : Fragment() {
          * install it inside the SupportMapFragment. This method will only be triggered once the
          * user has installed Google Play services and returned to the app.
          */
-        val sydney = LatLng(-34.0, 151.0)
-        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        mMap.uiSettings.isZoomControlsEnabled = true
+        mMap.uiSettings.isIndoorLevelPickerEnabled = true
+        mMap.uiSettings.isCompassEnabled = true
+        mMap.uiSettings.isMapToolbarEnabled = true
+
+        viewModel.getLocationStories().observe(viewLifecycleOwner) { location ->
+            when (location) {
+                is ResultState.Error -> {}
+                ResultState.Loading -> {}
+                is ResultState.Success -> location.data.listStory.forEach {
+                    mMap.addMarker(
+                        MarkerOptions()
+                            .position(LatLng(it.lat!!, it.lon!!))
+                            .title(it.name)
+                    )
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(it.lat, it.lon)))
+                }
+                }
+            }
     }
 
     override fun onCreateView(

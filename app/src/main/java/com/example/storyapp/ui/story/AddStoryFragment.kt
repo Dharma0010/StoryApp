@@ -22,6 +22,12 @@ import com.example.storyapp.databinding.FragmentAddStoryBinding
 import com.example.storyapp.getImageUri
 import com.example.storyapp.reduceFileImage
 import com.example.storyapp.uriToFile
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.OnTokenCanceledListener
 
 class AddStoryFragment : Fragment() {
 
@@ -31,25 +37,9 @@ class AddStoryFragment : Fragment() {
     private val viewModel: StoryViewModel by viewModels {
         StoryViewModelFactory.getInstance(requireActivity())
     }
-
     private var currentImageUri: Uri? = null
 
-    private val requestPermissionLauncher =
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted: Boolean ->
-            if (isGranted) {
-                Toast.makeText(requireActivity(), "Permission request granted", Toast.LENGTH_LONG).show()
-            } else {
-                Toast.makeText(requireActivity(), "Permission request denied", Toast.LENGTH_LONG).show()
-            }
-        }
-
-    private fun allPermissionsGranted() =
-        ContextCompat.checkSelfPermission(
-            requireActivity(),
-            REQUIRED_PERMISSION
-        ) == PackageManager.PERMISSION_GRANTED
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,10 +53,36 @@ class AddStoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAddStoryBinding.bind(view)
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
+        binding.shareLocSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                uploadStoryWithLocation()
+            } else {
+                uploadStory()
+            }
+        }
         binding.cameraButton.setOnClickListener { startCamera() }
         binding.galleryButton.setOnClickListener { startGallery() }
-        binding.uploadButton.setOnClickListener { uploadImage() }
+        binding.uploadButton.setOnClickListener {
+
+            viewModel.addStory.observe(viewLifecycleOwner) { result ->
+                when(result) {
+                    is ResultState.Error -> {
+                        showLoading(false)
+                        showToast(result.error)
+                    }
+                    is ResultState.Loading -> {
+                        showLoading(true)
+                    }
+                    is ResultState.Success -> {
+                        showLoading(false)
+                        showToast(result.data.message)
+                        findNavController().popBackStack()
+                    }
+                }
+            }
+        }
     }
 
     private fun startGallery() {
@@ -105,34 +121,12 @@ class AddStoryFragment : Fragment() {
         }
     }
 
-    private fun uploadImage() {
+    private fun uploadStory() {
         currentImageUri?.let { uri ->
             val imageFile = uriToFile(uri, requireContext()).reduceFileImage()
-            Log.d("Image File", "showImage: ${imageFile.path}")
             val description = binding.editTextDescription.text.toString()
-
-            viewModel.addStory(imageFile, description).observe(viewLifecycleOwner) { result ->
-                if (result != null) {
-                    when (result) {
-                        is ResultState.Loading -> {
-                            showLoading(true)
-                        }
-
-                        is ResultState.Success -> {
-                            showToast(result.data.message)
-                            showLoading(false)
-                            //val action = AddStoryFragmentDirections.actionAddandStoryFragmentToStoryListFragment()
-                            findNavController().navigate(R.id.action_addandStoryFragment_to_storyListFragment)
-                        }
-
-                        is ResultState.Error -> {
-                            showToast(result.error)
-                            showLoading(false)
-                        }
-                    }
-                }
-            }
-        } ?: showToast(getString(R.string.empty_image_warning))
+            viewModel.uploadStory(imageFile, description)
+        }
     }
 
     private fun showToast(message: String) {
@@ -146,6 +140,65 @@ class AddStoryFragment : Fragment() {
         binding.galleryButton.isEnabled = !isLoading
         binding.previewImageView.isEnabled = !isLoading
         binding.textInputLayoutdesc.isEnabled = !isLoading
+    }
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { permissions ->
+            when {
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false -> {
+                    // Precise location access granted.
+                    uploadStoryWithLocation()
+                }
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false -> {
+                    // Only approximate location access granted.
+                    uploadStoryWithLocation()
+                }
+                else -> {
+                    uploadStory()
+                    binding.shareLocSwitch.isChecked = false
+                }
+            }
+        }
+    private fun checkPermission(permission: String): Boolean {
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            permission
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+    private fun uploadStoryWithLocation() {
+        currentImageUri?.let { uri ->
+            val imageFile = uriToFile(uri, requireContext()).reduceFileImage()
+            Log.d("Image File", "showImage: ${imageFile.path}")
+            val description = binding.editTextDescription.text.toString()
+            if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION) &&
+                checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+            ) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    if (location != null) {
+                        val lat = location.latitude.toFloat()
+                        val lon = location.longitude.toFloat()
+                        viewModel.uploadStory(imageFile, description, lat, lon)
+                        showToast("$lat, $lon")
+                    } else {
+                        Toast.makeText(
+                            requireContext(),
+                            "Location is not found. Try Again",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            } else {
+                requestPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    )
+                )
+            }
+        }
+
     }
 
     override fun onDestroy() {

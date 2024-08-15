@@ -81,4 +81,6 @@ dependencies {
     implementation(libs.picasso)
 
     implementation(libs.androidx.paging.runtime.ktx)
+
+    implementation(libs.play.services.location)
 }
