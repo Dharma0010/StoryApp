@@ -50,7 +50,14 @@ interface ApiService {
     suspend fun addStory(
         @Part("description") description: RequestBody,
         @Part file: MultipartBody.Part,
-        @Part("lat") lat: RequestBody? = null,
-        @Part("lon") lon: RequestBody? = null
+        @Part("lat") lat: Float? = null,
+        @Part("lon") lon: Float? = null
     ): FileUploadResponse
+
+//    @Multipart
+//    @POST("stories")
+//    suspend fun addStory(
+//        @Part("description") description: RequestBody,
+//        @Part file: MultipartBody.Part,
+//    ): FileUploadResponse
 }

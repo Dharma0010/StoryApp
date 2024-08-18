@@ -2,6 +2,7 @@ package com.example.storyapp.ui.story
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -39,6 +40,9 @@ class AddStoryFragment : Fragment() {
     }
     private var currentImageUri: Uri? = null
 
+    private var latitude: Float = 0f
+    private var longitude: Float = 0f
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreateView(
@@ -49,40 +53,47 @@ class AddStoryFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_add_story, container, false)
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAddStoryBinding.bind(view)
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         binding.shareLocSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                uploadStoryWithLocation()
-            } else {
-                uploadStory()
+                checkLocationPermissionAndGetLocation { location ->
+                    if (location != null) {
+                        latitude = location.latitude.toFloat()
+                        longitude = location.longitude.toFloat()
+                    }
+                }
             }
-        }
-        binding.cameraButton.setOnClickListener { startCamera() }
-        binding.galleryButton.setOnClickListener { startGallery() }
-        binding.uploadButton.setOnClickListener {
 
-            viewModel.addStory.observe(viewLifecycleOwner) { result ->
-                when(result) {
-                    is ResultState.Error -> {
-                        showLoading(false)
-                        showToast(result.error)
-                    }
-                    is ResultState.Loading -> {
-                        showLoading(true)
-                    }
-                    is ResultState.Success -> {
-                        showLoading(false)
-                        showToast(result.data.message)
-                        findNavController().popBackStack()
+        }.also {
+            binding.uploadButton.setOnClickListener {
+            uploadStory()
+                viewModel.addStory.observe(viewLifecycleOwner) { result ->
+                    when(result) {
+                        is ResultState.Error -> {
+                            showLoading(false)
+                            showToast(result.error)
+                        }
+                        is ResultState.Loading -> showLoading(true)
+                        is ResultState.Success -> {
+                            showLoading(false)
+                            showToast(result.data.message)
+                            findNavController().popBackStack()
+                        }
                     }
                 }
             }
         }
+
+        binding.cameraButton.setOnClickListener { startCamera() }
+        binding.galleryButton.setOnClickListener { startGallery() }
+
+
     }
 
     private fun startGallery() {
@@ -120,14 +131,24 @@ class AddStoryFragment : Fragment() {
             binding.previewImageView.setImageURI(it)
         }
     }
-
-    private fun uploadStory() {
+    private fun handleUploadStory(lat: Float? = null, lon: Float? = null) {
+        val description = binding.editTextDescription.text.toString()
         currentImageUri?.let { uri ->
             val imageFile = uriToFile(uri, requireContext()).reduceFileImage()
-            val description = binding.editTextDescription.text.toString()
-            viewModel.uploadStory(imageFile, description)
+            viewModel.uploadStory(imageFile, description, lat, lon)
+            showToast("lat: $lat lon: $lon")
         }
     }
+
+    private fun uploadStory() {
+        val locationChecked = binding.shareLocSwitch.isChecked
+        if (locationChecked) {
+            handleUploadStory(lat = latitude, lon = longitude)
+        } else {
+            handleUploadStory()
+        }
+    }
+
 
     private fun showToast(message: String) {
         Toast.makeText(requireActivity(), message, Toast.LENGTH_SHORT).show()
@@ -135,31 +156,12 @@ class AddStoryFragment : Fragment() {
 
     private fun showLoading(isLoading: Boolean) {
         binding.progressIndicator.visibility = if (isLoading) View.VISIBLE else View.GONE
-        binding.cameraButton.isEnabled = !isLoading
-        binding.uploadButton.isEnabled = !isLoading
-        binding.galleryButton.isEnabled = !isLoading
-        binding.previewImageView.isEnabled = !isLoading
-        binding.textInputLayoutdesc.isEnabled = !isLoading
     }
 
     private val requestPermissionLauncher =
         registerForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            when {
-                permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false -> {
-                    // Precise location access granted.
-                    uploadStoryWithLocation()
-                }
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false -> {
-                    // Only approximate location access granted.
-                    uploadStoryWithLocation()
-                }
-                else -> {
-                    uploadStory()
-                    binding.shareLocSwitch.isChecked = false
-                }
-            }
+        ) {
         }
     private fun checkPermission(permission: String): Boolean {
         return ContextCompat.checkSelfPermission(
@@ -167,38 +169,19 @@ class AddStoryFragment : Fragment() {
             permission
         ) == PackageManager.PERMISSION_GRANTED
     }
-    private fun uploadStoryWithLocation() {
-        currentImageUri?.let { uri ->
-            val imageFile = uriToFile(uri, requireContext()).reduceFileImage()
-            Log.d("Image File", "showImage: ${imageFile.path}")
-            val description = binding.editTextDescription.text.toString()
-            if (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION) &&
-                checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-            ) {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                    if (location != null) {
-                        val lat = location.latitude.toFloat()
-                        val lon = location.longitude.toFloat()
-                        viewModel.uploadStory(imageFile, description, lat, lon)
-                        showToast("$lat, $lon")
-                    } else {
-                        Toast.makeText(
-                            requireContext(),
-                            "Location is not found. Try Again",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            } else {
-                requestPermissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    )
-                )
+    private fun checkLocationPermissionAndGetLocation(callback: (Location?) -> Unit) {
+        if (
+            checkPermission(Manifest.permission.ACCESS_FINE_LOCATION) &&
+            checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+        ) {
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, CancellationTokenSource().token)
+                .addOnCompleteListener(requireActivity()) {
+                    val location: Location? = it.result
+                    callback(location)
             }
+        } else {
+            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
         }
-
     }
 
     override fun onDestroy() {

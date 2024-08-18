@@ -17,7 +17,7 @@ import java.io.File
 
 class StoryViewModel(private val repository: StoryRepository): ViewModel() {
 
-    private val _stories = MutableLiveData<ResultState<List<ListStory>>>()
+
     val stories: LiveData<PagingData<ListStory>> = repository.getStories().cachedIn(viewModelScope)
 
     private val _addStory = MutableLiveData<ResultState<FileUploadResponse>>()
@@ -27,16 +27,15 @@ class StoryViewModel(private val repository: StoryRepository): ViewModel() {
 
     fun getDetailStory(id: String) = repository.getDetailStory(id = id)
 
-
     fun getSession(): LiveData<UserModel> {
         return repository.getSession().asLiveData()
     }
 
-    fun uploadStory(file: File, description: String, lat: Float? = null, lon: Float? = null) {
+//    fun uploadStoryWithLocation(file: File, description: String, lat: Float? = null, lon: Float? = null) =
+//        repository.addStoryWithLocation(imageFile = file, description = description, lat = lat, lon = lon)
+
+    fun uploadStory(file: File, description: String, lat: Float? = null, lon: Float? = null) =
         viewModelScope.launch {
             _addStory.postValue(repository.addStory(imageFile = file, description = description, lat = lat, lon = lon))
         }
-
-    }
-
 }
